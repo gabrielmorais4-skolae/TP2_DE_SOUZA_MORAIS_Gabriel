@@ -8,18 +8,23 @@
     <persistence-unit name="productsPU" transaction-type="JTA">
         <description>Persistence Unit for Products API</description>
 
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
         <jta-data-source>jdbc/ProductsDS</jta-data-source>
 
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
 
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
-            <property name="hibernate.hbm2ddl.auto" value="drop-and-create"/>
+            <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="true"/>
-            <property name="eclipselink.logging.level" value="FINE"/>
-            <property name="eclipselink.logging.level.sql" value="FINE"/>
-            <property name="eclipselink.logging.parameters" value="true"/>
+            <property name="hibernate.highlight_sql" value="true"/>
+            <property name="hibernate.transaction.jta.platform" value="org.hibernate.engine.transaction.jta.platform.internal.SunOneJtaPlatform"/>
+            <property name="hibernate.ejb.use_class_enhancer" value="false"/>
+            <property name="hibernate.enhancer.enableDirtyTracking" value="false"/>
+            <property name="hibernate.enhancer.enableAssociationManagement" value="false"/>
+            <property name="hibernate.enhancer.enableLazyInitialization" value="false"/>
         </properties>
     </persistence-unit>
 
