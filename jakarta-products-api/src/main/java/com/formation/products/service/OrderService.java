@@ -1,9 +1,11 @@
 package com.formation.products.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.formation.products.dtos.response.MostOrderedProduct;
 import com.formation.products.model.Order;
 import com.formation.products.model.OrderItem;
 import com.formation.products.model.OrderStatus;
@@ -75,4 +77,17 @@ public class OrderService {
     public void deleteOrder(Long id) {
         orderRepository.delete(id);
     }
+
+    public BigDecimal getTotalRevenue() {
+        return orderRepository.getTotalRevenue();
+    }
+
+    public List<Object[]> countByStatus() {
+        return orderRepository.countByStatus();
+    }
+
+    public List<MostOrderedProduct> findMostOrderedProducts(int limit) {
+        return orderRepository.findMostOrderedProducts(limit);
+    }
+
 }

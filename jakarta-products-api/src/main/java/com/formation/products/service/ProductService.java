@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.formation.products.dtos.request.CreateProductDto;
+import com.formation.products.dtos.response.CategoryStats;
 import com.formation.products.dtos.response.GetCategoryDto;
 import com.formation.products.dtos.response.GetProductDto;
 import com.formation.products.dtos.response.GetSupplierDto;
@@ -138,6 +139,42 @@ public class ProductService {
             product.setCategory(toCategory);
             productRepository.save(product);
         }
+    }
+
+    public List<Object[]> countByCategory() {
+        return productRepository.countByCategory();
+    }
+
+    public List<Object[]> averagePriceByCategory() {
+        return productRepository.averagePriceByCategory();
+    }
+
+    public List<GetProductDto> findTopExpensive(int limit) {
+        return productRepository.findTopExpensive(limit).stream()
+            .map(this::toResponseDto)
+            .collect(Collectors.toList());
+    }
+
+    public List<GetProductDto> findNeverOrderedProducts() {
+        return productRepository.findNeverOrderedProducts().stream()
+            .map(this::toResponseDto)
+            .collect(Collectors.toList());
+    }
+
+    public List<CategoryStats> findCategoryStats() {
+        return productRepository.findCategoryStats();
+    }
+
+    public List<GetCategoryDto> findCategoriesWithMinProducts(int minProducts) {
+        return categoryRepository.findCategoriesWithMinProducts(minProducts).stream()
+            .map(c -> {
+                GetCategoryDto dto = new GetCategoryDto();
+                dto.setId(c.getId());
+                dto.setName(c.getName());
+                dto.setDescription(c.getDescription());
+                return dto;
+            })
+            .collect(Collectors.toList());
     }
 
     @Transactional

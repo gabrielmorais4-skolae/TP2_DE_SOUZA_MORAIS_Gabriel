@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import com.formation.products.dtos.response.CategoryStats;
 import com.formation.products.model.Product;
 import com.formation.products.model.Supplier;
 
@@ -97,5 +98,48 @@ public class JpaProductRepository implements IProductRepository {
     public long count() {
         TypedQuery<Long> query = em.createQuery("SELECT COUNT(p) FROM Product p", Long.class);
         return query.getSingleResult();
+    }
+
+    @Override
+    public List<Object[]> countByCategory() {
+        return em.createQuery(
+            "SELECT p.category.name, COUNT(p) FROM Product p GROUP BY p.category",
+            Object[].class)
+            .getResultList();
+    }
+
+    @Override
+    public List<Object[]> averagePriceByCategory() {
+        return em.createQuery(
+            "SELECT p.category.name, AVG(p.price) FROM Product p GROUP BY p.category",
+            Object[].class)
+            .getResultList();
+    }
+
+    @Override
+    public List<Product> findTopExpensive(int limit) {
+        return em.createQuery(
+            "SELECT p FROM Product p LEFT JOIN FETCH p.category LEFT JOIN FETCH p.supplier ORDER BY p.price DESC",
+            Product.class)
+            .setMaxResults(limit)
+            .getResultList();
+    }
+
+    @Override
+    public List<Product> findNeverOrderedProducts() {
+        return em.createQuery(
+            "SELECT p FROM Product p WHERE p NOT IN (SELECT oi.product FROM OrderItem oi)",
+            Product.class)
+            .getResultList();
+    }
+
+    @Override
+    public List<CategoryStats> findCategoryStats() {
+        return em.createQuery(
+            "SELECT NEW com.formation.products.dtos.response.CategoryStats(" +
+            "p.category.name, COUNT(p), AVG(p.price)) " +
+            "FROM Product p GROUP BY p.category",
+            CategoryStats.class)
+            .getResultList();
     }
 }

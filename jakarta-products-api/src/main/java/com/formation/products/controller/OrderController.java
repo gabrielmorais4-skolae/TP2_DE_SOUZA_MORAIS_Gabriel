@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.formation.products.dtos.request.CreateOrderDto;
 import com.formation.products.dtos.response.GetOrderDto;
 import com.formation.products.dtos.response.GetOrderItemDto;
+import com.formation.products.dtos.response.MostOrderedProduct;
 import com.formation.products.model.Order;
 import com.formation.products.model.OrderItem;
 import com.formation.products.model.OrderStatus;
@@ -82,6 +83,25 @@ public class OrderController {
     public Response deleteOrder(@PathParam("id") Long id) {
         orderService.deleteOrder(id);
         return Response.noContent().build();
+    }
+
+    @GET
+    @Path("/stats/total-revenue")
+    public Response totalRevenue() {
+        return Response.ok(orderService.getTotalRevenue()).build();
+    }
+
+    @GET
+    @Path("/stats/count-by-status")
+    public Response countByStatus() {
+        return Response.ok(orderService.countByStatus()).build();
+    }
+
+    @GET
+    @Path("/stats/most-ordered-products")
+    public Response mostOrderedProducts(@QueryParam("limit") @jakarta.ws.rs.DefaultValue("5") int limit) {
+        List<MostOrderedProduct> result = orderService.findMostOrderedProducts(limit);
+        return Response.ok(result).build();
     }
 
     private GetOrderDto toDto(Order order) {

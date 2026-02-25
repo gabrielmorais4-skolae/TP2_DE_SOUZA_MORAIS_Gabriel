@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 
 import com.formation.products.dtos.request.CreateProductDto;
+import com.formation.products.dtos.response.CategoryStats;
 import com.formation.products.dtos.response.GetProductDto;
 import com.formation.products.service.ProductService;
 
@@ -94,6 +95,43 @@ public class ProductController {
     public Response deleteProduct(@PathParam("id") String id) {
         productService.deleteProduct(id);
         return Response.noContent().build();
+    }
+
+    @GET
+    @Path("/stats/count-by-category")
+    public Response countByCategory() {
+        return Response.ok(productService.countByCategory()).build();
+    }
+
+    @GET
+    @Path("/stats/avg-price-by-category")
+    public Response avgPriceByCategory() {
+        return Response.ok(productService.averagePriceByCategory()).build();
+    }
+
+    @GET
+    @Path("/stats/top-expensive")
+    public Response topExpensive(@QueryParam("limit") @jakarta.ws.rs.DefaultValue("10") int limit) {
+        return Response.ok(productService.findTopExpensive(limit)).build();
+    }
+
+    @GET
+    @Path("/stats/never-ordered")
+    public Response neverOrdered() {
+        return Response.ok(productService.findNeverOrderedProducts()).build();
+    }
+
+    @GET
+    @Path("/stats/category-stats")
+    public Response categoryStats() {
+        List<CategoryStats> stats = productService.findCategoryStats();
+        return Response.ok(stats).build();
+    }
+
+    @GET
+    @Path("/stats/categories-with-min-products")
+    public Response categoriesWithMinProducts(@QueryParam("min") @jakarta.ws.rs.DefaultValue("1") int min) {
+        return Response.ok(productService.findCategoriesWithMinProducts(min)).build();
     }
 
     public static class ErrorMessage {

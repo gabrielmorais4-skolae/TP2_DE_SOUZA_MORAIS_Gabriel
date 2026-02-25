@@ -61,4 +61,14 @@ public class JpaCategoryRepository implements ICategoryRepository {
             em.remove(category);
         }
     }
+
+    @Override
+    public List<Category> findCategoriesWithMinProducts(int minProducts) {
+        TypedQuery<Category> query = em.createQuery(
+            "SELECT c FROM Category c WHERE " +
+            "(SELECT COUNT(p) FROM Product p WHERE p.category = c) >= :minProducts",
+            Category.class);
+        query.setParameter("minProducts", (long) minProducts);
+        return query.getResultList();
+    }
 }

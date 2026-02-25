@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import com.formation.products.model.Category;
+import com.formation.products.dtos.response.CategoryStats;
 import com.formation.products.model.Product;
 import com.formation.products.model.Supplier;
 
@@ -27,4 +27,14 @@ public interface IProductRepository {
     void delete(String id);
 
     long count();
+
+    List<Object[]> countByCategory();
+
+    List<Object[]> averagePriceByCategory();
+
+    List<Product> findTopExpensive(int limit);
+
+    List<Product> findNeverOrderedProducts();
+
+    List<CategoryStats> findCategoryStats();
 }

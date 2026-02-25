@@ -17,4 +17,6 @@ public interface ICategoryRepository {
     List<Category> findAll();
 
     void deleteById(String id);
+
+    List<Category> findCategoriesWithMinProducts(int minProducts);
 }
