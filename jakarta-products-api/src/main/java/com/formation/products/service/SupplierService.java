@@ -11,8 +11,10 @@ import com.formation.products.repository.ISupplierRepository;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 @ApplicationScoped
+@Transactional
 public class SupplierService {
 
     @Inject
@@ -21,8 +23,9 @@ public class SupplierService {
     public GetSupplierDto createSupplier(CreateSupplierDto dto) {
         Supplier supplier = new Supplier();
         supplier.setName(dto.getName());
-        Supplier saved = supplierRepository.save(supplier);
-        return toDto(saved);
+        supplier.setEmail(dto.getEmail());
+        supplier.setPhone(dto.getPhone());
+        return toDto(supplierRepository.save(supplier));
     }
 
     public Optional<GetSupplierDto> getSupplierById(String id) {
@@ -38,6 +41,8 @@ public class SupplierService {
     public Optional<GetSupplierDto> updateSupplier(String id, CreateSupplierDto dto) {
         return supplierRepository.findById(id).map(supplier -> {
             supplier.setName(dto.getName());
+            supplier.setEmail(dto.getEmail());
+            supplier.setPhone(dto.getPhone());
             return toDto(supplierRepository.save(supplier));
         });
     }
@@ -50,6 +55,8 @@ public class SupplierService {
         GetSupplierDto dto = new GetSupplierDto();
         dto.setId(supplier.getId());
         dto.setName(supplier.getName());
+        dto.setEmail(supplier.getEmail());
+        dto.setPhone(supplier.getPhone());
         return dto;
     }
 }

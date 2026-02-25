@@ -99,18 +99,13 @@ public class ProductService {
     }
 
     public void deleteProduct(String id) {
-        if (productRepository.count(id) > 0) {
+        if (productRepository.findById(id).isPresent()) {
             productRepository.delete(id);
         }
     }
 
-    /**
-     * Crée un produit en cherchant ou créant la catégorie par son nom.
-     * Tout se passe dans UNE seule transaction : si une étape échoue, tout est annulé.
-     */
     @Transactional
     public GetProductDto createProductWithCategory(Product product, String categoryName) {
-        // 1. Chercher ou créer la catégorie
         Category category = categoryRepository.findByName(categoryName)
             .orElseGet(() -> {
                 Category newCategory = new Category();
@@ -118,38 +113,21 @@ public class ProductService {
                 return categoryRepository.save(newCategory);
             });
 
-        // 2. Assigner la catégorie au produit
         product.setCategory(category);
 
-        // 3. Sauvegarder le produit
         return toResponseDto(productRepository.save(product));
     }
 
-    /**
-     * Met à jour le stock d'un produit.
-     * L'entité est "managed" dans la transaction : pas besoin d'appeler save()
-     * explicitement, le flush automatique en fin de transaction suffit.
-     * On appelle save() ici pour être explicite et compatible avec notre repo.
-     */
     @Transactional
     public void updateStock(String productId, int quantity) {
-        // 1. Charger le produit (entité managed dans la transaction)
         Product product = productRepository.findById(productId)
             .orElseThrow(() -> new IllegalArgumentException("Product not found: " + productId));
 
-        // 2. Modifier le stock
         product.setStockQuantity(quantity);
 
-        // 3. Pas besoin d'appeler save() : l'entité est managed, le changement
-        //    sera flushé automatiquement à la fin de la transaction.
-        //    On l'appelle quand même pour la clarté avec notre implémentation.
         productRepository.save(product);
     }
 
-    /**
-     * Déplace tous les produits d'une catégorie vers une autre.
-     * Transaction atomique : soit tout est déplacé, soit rien ne l'est.
-     */
     @Transactional
     public void transferProducts(String fromCategoryId, String toCategoryId) {
         Category toCategory = categoryRepository.findById(toCategoryId)
@@ -162,11 +140,6 @@ public class ProductService {
         }
     }
 
-    /**
-     * Méthode de démonstration du rollback.
-     * Le produit est persisté puis une exception est levée → rollback automatique.
-     * Le produit NE doit PAS apparaître en base après l'appel.
-     */
     @Transactional
     public void testRollback() {
         Product p = new Product();
@@ -175,7 +148,6 @@ public class ProductService {
         p.setStockQuantity(0);
         productRepository.save(p);
 
-        // L'exception déclenche le rollback : le produit ci-dessus ne sera pas commité
         throw new RuntimeException("Test rollback : cette transaction doit être annulée");
     }
 

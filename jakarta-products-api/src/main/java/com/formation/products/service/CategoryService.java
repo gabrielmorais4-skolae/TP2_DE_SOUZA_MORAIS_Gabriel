@@ -20,9 +20,6 @@ public class CategoryService {
     @Inject
     private ICategoryRepository categoryRepository;
 
-    /**
-     * Crée une catégorie avec un nom et une description.
-     */
     public GetCategoryDto createCategory(String name, String description) {
         Category category = new Category();
         category.setName(name);
@@ -30,9 +27,6 @@ public class CategoryService {
         return toDto(categoryRepository.save(category));
     }
 
-    /**
-     * Méthode conservée pour compatibilité avec le contrôleur existant.
-     */
     public GetCategoryDto createCategory(CreateCategoryDto dto) {
         return createCategory(dto.getName(), null);
     }
@@ -47,11 +41,6 @@ public class CategoryService {
             .collect(Collectors.toList());
     }
 
-    /**
-     * Retourne une catégorie avec ses produits chargés via JOIN FETCH.
-     * Sans JOIN FETCH, accéder à la collection hors transaction provoquerait
-     * une LazyInitializationException.
-     */
     public Optional<GetCategoryDto> getCategoryWithProducts(String id) {
         return categoryRepository.findWithProducts(id).map(this::toDtoWithProducts);
     }
@@ -63,11 +52,6 @@ public class CategoryService {
         });
     }
 
-    /**
-     * Supprime une catégorie.
-     * Comme Category a orphanRemoval = true sur ses produits, tous les produits
-     * de cette catégorie seront également supprimés en cascade.
-     */
     public void deleteCategory(String id) {
         categoryRepository.deleteById(id);
     }

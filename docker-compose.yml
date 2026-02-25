@@ -1,23 +1,23 @@
 services:
-  # ── PostgreSQL (shared) ──────────────────────────────────────────────────────
+  # ── PostgreSQL ────────────────────────────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
     container_name: products-db
     environment:
-      POSTGRES_DB: db-tp2
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: productsdb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U admin"]
       interval: 5s
       timeout: 5s
       retries: 10
 
-  # ── Jakarta EE — Payara Micro (port 8080) ────────────────────────────────────
+  # ── Jakarta EE — WildFly (port 8080, management 9990) ────────────────────────
   jakarta-app:
     build:
       context: ./jakarta-products-api
@@ -25,12 +25,13 @@ services:
     container_name: jakarta-products-api
     ports:
       - "8080:8080"
+      - "9990:9990"
     environment:
       DB_HOST: postgres
       DB_PORT: "5432"
-      DB_NAME: db-tp2
-      DB_USER: postgres
-      DB_PASSWORD: postgres
+      DB_NAME: productsdb
+      DB_USER: admin
+      DB_PASSWORD: admin123
     depends_on:
       postgres:
         condition: service_healthy

@@ -6,11 +6,9 @@
              version="3.0">
 
     <persistence-unit name="productsPU" transaction-type="JTA">
-        <description>Persistence Unit for Products API</description>
+        <description>Persistence Unit for Products API — WildFly / PostgreSQL</description>
 
-        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-
-        <jta-data-source>jdbc/ProductsDS</jta-data-source>
+        <jta-data-source>java:jboss/datasources/PostgresDS</jta-data-source>
 
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
 
@@ -19,12 +17,6 @@
             <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="true"/>
-            <property name="hibernate.highlight_sql" value="true"/>
-            <property name="hibernate.transaction.jta.platform" value="org.hibernate.engine.transaction.jta.platform.internal.SunOneJtaPlatform"/>
-            <property name="hibernate.ejb.use_class_enhancer" value="false"/>
-            <property name="hibernate.enhancer.enableDirtyTracking" value="false"/>
-            <property name="hibernate.enhancer.enableAssociationManagement" value="false"/>
-            <property name="hibernate.enhancer.enableLazyInitialization" value="false"/>
         </properties>
     </persistence-unit>
 

@@ -1,9 +1,11 @@
 package com.formation.products.repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 import com.formation.products.model.Product;
+import com.formation.products.model.Supplier;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
@@ -54,11 +56,33 @@ public class JpaProductRepository implements IProductRepository {
     }
 
     @Override
-    public long count(String id) {
-        TypedQuery<Long> query = em.createQuery(
-            "SELECT COUNT(p) FROM Product p WHERE p.id = :id", Long.class);
-        query.setParameter("id", id);
-        return query.getSingleResult();
+    public List<Product> findBySupplier(Supplier supplier) {
+        TypedQuery<Product> query = em.createQuery(
+            "SELECT p FROM Product p LEFT JOIN FETCH p.category LEFT JOIN FETCH p.supplier WHERE p.supplier = :supplier",
+            Product.class);
+        query.setParameter("supplier", supplier);
+        return query.getResultList();
+    }
+
+    @Override
+    public List<Product> findByPriceRange(BigDecimal min, BigDecimal max) {
+        TypedQuery<Product> query = em.createQuery(
+            "SELECT p FROM Product p LEFT JOIN FETCH p.category LEFT JOIN FETCH p.supplier" +
+            " WHERE p.price BETWEEN :min AND :max ORDER BY p.price",
+            Product.class);
+        query.setParameter("min", min);
+        query.setParameter("max", max);
+        return query.getResultList();
+    }
+
+    @Override
+    public List<Product> searchByName(String keyword) {
+        TypedQuery<Product> query = em.createQuery(
+            "SELECT p FROM Product p LEFT JOIN FETCH p.category LEFT JOIN FETCH p.supplier" +
+            " WHERE LOWER(p.name) LIKE LOWER(:keyword)",
+            Product.class);
+        query.setParameter("keyword", "%" + keyword + "%");
+        return query.getResultList();
     }
 
     @Override
@@ -67,5 +91,11 @@ public class JpaProductRepository implements IProductRepository {
         if (product != null) {
             em.remove(product);
         }
+    }
+
+    @Override
+    public long count() {
+        TypedQuery<Long> query = em.createQuery("SELECT COUNT(p) FROM Product p", Long.class);
+        return query.getSingleResult();
     }
 }

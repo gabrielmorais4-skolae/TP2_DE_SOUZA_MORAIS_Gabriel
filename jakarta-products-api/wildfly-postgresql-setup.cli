@@ -1,11 +1,11 @@
 embed-server --std-out=echo
 
 batch
-module add --name=org.postgresql --resources=/opt/jboss/wildfly/standalone/deployments/postgresql-42.7.1.jar --dependencies=javax.api,javax.transaction.api
-/subsystem=datasources/jdbc-driver=postgresql:add(driver-name=postgresql,driver-module-name=org.postgresql,driver-class-name=org.postgresql.Driver)
-/subsystem=datasources/data-source=PostgresDS:add(jndi-name=java:jboss/datasources/PostgresDS,driver-name=postgresql,connection-url=jdbc:postgresql://postgres:5432/productsdb,user-name=admin,password=admin123,enabled=true,use-ccm=false,min-pool-size=5,max-pool-size=20)
-run-batch
 
-/subsystem=datasources/data-source=PostgresDS:test-connection-in-pool
+/subsystem=datasources/jdbc-driver=postgresql:add(driver-name=postgresql,driver-module-name=org.postgresql,driver-class-name=org.postgresql.Driver)
+
+/subsystem=datasources/data-source=PostgresDS:add(jndi-name=java:jboss/datasources/PostgresDS,driver-name=postgresql,connection-url=jdbc:postgresql://${env.DB_HOST:postgres}:${env.DB_PORT:5432}/${env.DB_NAME:productsdb},user-name=${env.DB_USER:admin},password=${env.DB_PASSWORD:admin123},enabled=true,use-ccm=false,min-pool-size=5,max-pool-size=20)
+
+run-batch
 
 stop-embedded-server
