@@ -10,6 +10,10 @@ public interface ICategoryRepository {
 
     Optional<Category> findById(String id);
 
+    Optional<Category> findByName(String name);
+
+    Optional<Category> findWithProducts(String id);
+
     List<Category> findAll();
 
     void deleteById(String id);

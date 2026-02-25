@@ -23,6 +23,9 @@ public class Category {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "description")
+    private String description;
+
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<Product> products;
 
@@ -40,6 +43,9 @@ public class Category {
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
     public java.util.List<Product> getProducts() { return products; }
     public void setProducts(java.util.List<Product> products) { this.products = products; }
