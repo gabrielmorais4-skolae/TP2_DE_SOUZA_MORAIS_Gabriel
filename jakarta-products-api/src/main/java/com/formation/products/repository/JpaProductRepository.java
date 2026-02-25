@@ -1,7 +1,9 @@
 package com.formation.products.repository;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.formation.products.dtos.response.CategoryStats;
@@ -141,5 +143,18 @@ public class JpaProductRepository implements IProductRepository {
             "FROM Product p GROUP BY p.category",
             CategoryStats.class)
             .getResultList();
+    }
+
+    @Override
+    public List<Product> findAllSlow() {
+        return em.createQuery("SELECT p FROM Product p", Product.class)
+            .getResultList();
+    }
+
+    @Override
+    public Optional<Product> findByIdWithGraph(String id) {
+        Map<String, Object> hints = new HashMap<>();
+        hints.put("jakarta.persistence.fetchgraph", em.getEntityGraph("Product.full"));
+        return Optional.ofNullable(em.find(Product.class, id, hints));
     }
 }

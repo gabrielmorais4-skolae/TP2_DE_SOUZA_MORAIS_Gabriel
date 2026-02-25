@@ -19,8 +19,8 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -50,9 +50,31 @@ public class ProductController {
     }
 
     @GET
+    @Path("/slow")
+    public Response getAllProductsSlow() {
+        return Response.ok(productService.getAllProductsSlow()).build();
+    }
+
+    @GET
+    @Path("/fast")
+    public Response getAllProductsFast() {
+        return Response.ok(productService.getAllProducts()).build();
+    }
+
+    @GET
     @Path("/{id}")
     public Response getProductById(@PathParam("id") String id) {
         return productService.getProductById(id)
+            .map(dto -> Response.ok(dto).build())
+            .orElse(Response.status(Response.Status.NOT_FOUND)
+                    .entity(new ErrorMessage("Produit non trouvé"))
+                    .build());
+    }
+
+    @GET
+    @Path("/{id}/full")
+    public Response getProductByIdFull(@PathParam("id") String id) {
+        return productService.getProductByIdWithGraph(id)
             .map(dto -> Response.ok(dto).build())
             .orElse(Response.status(Response.Status.NOT_FOUND)
                     .entity(new ErrorMessage("Produit non trouvé"))

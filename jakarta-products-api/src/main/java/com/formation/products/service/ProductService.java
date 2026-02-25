@@ -64,6 +64,16 @@ public class ProductService {
             .collect(Collectors.toList());
     }
 
+    public List<GetProductDto> getAllProductsSlow() {
+        return productRepository.findAllSlow().stream()
+            .map(this::toResponseDto)
+            .collect(Collectors.toList());
+    }
+
+    public Optional<GetProductDto> getProductByIdWithGraph(String id) {
+        return productRepository.findByIdWithGraph(id).map(this::toResponseDto);
+    }
+
     public List<GetProductDto> getProductsByCategory(String categoryId) {
         return productRepository.findByCategory(categoryId).stream()
             .map(this::toResponseDto)

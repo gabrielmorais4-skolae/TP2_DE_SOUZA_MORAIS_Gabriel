@@ -16,6 +16,8 @@ public interface IProductRepository {
 
     List<Product> findAll();
 
+    List<Product> findAllSlow();
+
     List<Product> findByCategory(String categoryId);
 
     List<Product> findBySupplier(Supplier supplier);
@@ -37,4 +39,6 @@ public interface IProductRepository {
     List<Product> findNeverOrderedProducts();
 
     List<CategoryStats> findCategoryStats();
+
+    Optional<Product> findByIdWithGraph(String id);
 }

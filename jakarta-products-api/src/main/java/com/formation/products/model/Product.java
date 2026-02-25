@@ -11,6 +11,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -20,6 +23,19 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+@NamedEntityGraphs({
+    @NamedEntityGraph(
+        name = "Product.withCategory",
+        attributeNodes = @NamedAttributeNode("category")
+    ),
+    @NamedEntityGraph(
+        name = "Product.full",
+        attributeNodes = {
+            @NamedAttributeNode("category"),
+            @NamedAttributeNode("supplier")
+        }
+    )
+})
 @Entity
 @Table(name = "products")
 public class Product {
