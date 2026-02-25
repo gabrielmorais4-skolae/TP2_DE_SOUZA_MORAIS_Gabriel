@@ -1,0 +1,2 @@
+create-jdbc-connection-pool --datasourceclassname org.postgresql.ds.PGSimpleDataSource --restype javax.sql.DataSource --property user=${ENV=DB_USER}:password=${ENV=DB_PASSWORD}:DatabaseName=${ENV=DB_NAME}:ServerName=${ENV=DB_HOST}:PortNumber=${ENV=DB_PORT} ProductsPool
+create-jdbc-resource --connectionpoolid ProductsPool jdbc/ProductsDS
