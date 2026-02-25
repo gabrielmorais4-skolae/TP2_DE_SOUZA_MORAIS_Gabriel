@@ -16,6 +16,12 @@ API REST Jakarta EE avec persistence JPA complète déployée sur WildFly 30 + P
 - Statistiques d'agrégation (COUNT, AVG, SUM, GROUP BY)
 - Démonstration du problème N+1 et sa résolution
 
+## Run
+
+```bash
+docker compose up -d
+```
+
 ## Modèle de Données
 
 ```
