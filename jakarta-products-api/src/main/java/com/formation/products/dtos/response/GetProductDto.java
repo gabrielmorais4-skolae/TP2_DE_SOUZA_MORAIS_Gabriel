@@ -9,9 +9,11 @@ public class GetProductDto {
     private String name;
     private String description;
     private BigDecimal price;
-    private String category;
+    private GetCategoryDto category;
+    private GetSupplierDto supplier;
     private Integer stockQuantity;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public GetProductDto() {}
 
@@ -27,12 +29,18 @@ public class GetProductDto {
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }
 
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
+    public GetCategoryDto getCategory() { return category; }
+    public void setCategory(GetCategoryDto category) { this.category = category; }
+
+    public GetSupplierDto getSupplier() { return supplier; }
+    public void setSupplier(GetSupplierDto supplier) { this.supplier = supplier; }
 
     public Integer getStockQuantity() { return stockQuantity; }
     public void setStockQuantity(Integer stockQuantity) { this.stockQuantity = stockQuantity; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

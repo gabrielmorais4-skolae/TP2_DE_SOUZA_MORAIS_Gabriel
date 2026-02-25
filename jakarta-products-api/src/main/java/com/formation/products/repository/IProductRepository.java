@@ -17,7 +17,5 @@ public interface IProductRepository {
 
     boolean exists(String id);
 
-    long count();
-
     void delete(String id);
 }

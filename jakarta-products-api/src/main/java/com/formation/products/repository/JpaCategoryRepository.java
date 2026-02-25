@@ -1,0 +1,48 @@
+package com.formation.products.repository;
+
+import java.util.List;
+import java.util.Optional;
+
+import com.formation.products.model.Category;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.transaction.Transactional;
+
+@ApplicationScoped
+@Transactional
+public class JpaCategoryRepository implements ICategoryRepository {
+
+    @PersistenceContext(unitName = "productsPU")
+    private EntityManager em;
+
+    @Override
+    public Category save(Category category) {
+        if (category.getId() == null || em.find(Category.class, category.getId()) == null) {
+            em.persist(category);
+            return category;
+        }
+        return em.merge(category);
+    }
+
+    @Override
+    public Optional<Category> findById(String id) {
+        return Optional.ofNullable(em.find(Category.class, id));
+    }
+
+    @Override
+    public List<Category> findAll() {
+        TypedQuery<Category> query = em.createQuery("SELECT c FROM Category c", Category.class);
+        return query.getResultList();
+    }
+
+    @Override
+    public void deleteById(String id) {
+        Category category = em.find(Category.class, id);
+        if (category != null) {
+            em.remove(category);
+        }
+    }
+}

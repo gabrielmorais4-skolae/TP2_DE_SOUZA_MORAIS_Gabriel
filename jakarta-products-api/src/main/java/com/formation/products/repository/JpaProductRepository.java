@@ -15,12 +15,12 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class JpaProductRepository implements IProductRepository {
 
-    @PersistenceContext(unitName = "ProductsPU")
+    @PersistenceContext(unitName = "productsPU")
     private EntityManager em;
 
     @Override
     public Product save(Product product) {
-        if (em.find(Product.class, product.getId()) == null) {
+        if (product.getId() == null || em.find(Product.class, product.getId()) == null) {
             em.persist(product);
             return product;
         }
@@ -29,20 +29,27 @@ public class JpaProductRepository implements IProductRepository {
 
     @Override
     public Optional<Product> findById(String id) {
-        return Optional.ofNullable(em.find(Product.class, id));
+        TypedQuery<Product> query = em.createQuery(
+            "SELECT p FROM Product p LEFT JOIN FETCH p.category LEFT JOIN FETCH p.supplier WHERE p.id = :id",
+            Product.class);
+        query.setParameter("id", id);
+        return query.getResultList().stream().findFirst();
     }
 
     @Override
     public List<Product> findAll() {
-        TypedQuery<Product> query = em.createQuery("SELECT p FROM Product p", Product.class);
+        TypedQuery<Product> query = em.createQuery(
+            "SELECT p FROM Product p LEFT JOIN FETCH p.category LEFT JOIN FETCH p.supplier",
+            Product.class);
         return query.getResultList();
     }
 
     @Override
-    public List<Product> findByCategory(String category) {
+    public List<Product> findByCategory(String categoryId) {
         TypedQuery<Product> query = em.createQuery(
-            "SELECT p FROM Product p WHERE LOWER(p.category) = LOWER(:category)", Product.class);
-        query.setParameter("category", category);
+            "SELECT p FROM Product p LEFT JOIN FETCH p.category LEFT JOIN FETCH p.supplier WHERE p.category.id = :categoryId",
+            Product.class);
+        query.setParameter("categoryId", categoryId);
         return query.getResultList();
     }
 
@@ -52,12 +59,6 @@ public class JpaProductRepository implements IProductRepository {
             "SELECT COUNT(p) FROM Product p WHERE p.id = :id", Long.class);
         query.setParameter("id", id);
         return query.getSingleResult() > 0;
-    }
-
-    @Override
-    public long count() {
-        TypedQuery<Long> query = em.createQuery("SELECT COUNT(p) FROM Product p", Long.class);
-        return query.getSingleResult();
     }
 
     @Override
