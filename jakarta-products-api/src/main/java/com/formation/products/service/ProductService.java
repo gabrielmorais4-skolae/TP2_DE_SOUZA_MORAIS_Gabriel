@@ -97,7 +97,7 @@ public class ProductService {
     }
 
     public void deleteProduct(String id) {
-        if (productRepository.exists(id)) {
+        if (productRepository.count(id) > 0) {
             productRepository.delete(id);
         }
     }

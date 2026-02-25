@@ -15,7 +15,7 @@ public interface IProductRepository {
 
     List<Product> findByCategory(String category);
 
-    boolean exists(String id);
+    long count(String id);
 
     void delete(String id);
 }

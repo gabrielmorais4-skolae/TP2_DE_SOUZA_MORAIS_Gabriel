@@ -54,11 +54,11 @@ public class JpaProductRepository implements IProductRepository {
     }
 
     @Override
-    public boolean exists(String id) {
+    public long count(String id) {
         TypedQuery<Long> query = em.createQuery(
             "SELECT COUNT(p) FROM Product p WHERE p.id = :id", Long.class);
         query.setParameter("id", id);
-        return query.getSingleResult() > 0;
+        return query.getSingleResult();
     }
 
     @Override
