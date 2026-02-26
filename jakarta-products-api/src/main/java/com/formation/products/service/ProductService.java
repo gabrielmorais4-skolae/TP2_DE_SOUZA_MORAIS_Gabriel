@@ -9,6 +9,8 @@ import com.formation.products.dtos.response.CategoryStats;
 import com.formation.products.dtos.response.GetCategoryDto;
 import com.formation.products.dtos.response.GetProductDto;
 import com.formation.products.dtos.response.GetSupplierDto;
+import com.formation.products.exception.DuplicateProductException;
+import com.formation.products.exception.ProductNotFoundException;
 import com.formation.products.model.Category;
 import com.formation.products.model.Product;
 import com.formation.products.model.Supplier;
@@ -34,6 +36,10 @@ public class ProductService {
     private ISupplierRepository supplierRepository;
 
     public GetProductDto createProduct(CreateProductDto dto) {
+        if (dto.getSku() != null && productRepository.existsBySku(dto.getSku())) {
+            throw new DuplicateProductException(dto.getSku());
+        }
+
         Category category = categoryRepository.findById(dto.getCategoryId())
             .orElseThrow(() -> new IllegalArgumentException("Category not found: " + dto.getCategoryId()));
 
@@ -81,34 +87,40 @@ public class ProductService {
             .collect(Collectors.toList());
     }
 
-    public Optional<GetProductDto> updateProduct(String id, CreateProductDto dto) {
-        return productRepository.findById(id).map(product -> {
-            Category category = categoryRepository.findById(dto.getCategoryId())
-                .orElseThrow(() -> new IllegalArgumentException("Category not found: " + dto.getCategoryId()));
+    public GetProductDto updateProduct(String id, CreateProductDto dto) {
+        Product product = productRepository.findById(id)
+            .orElseThrow(() -> new ProductNotFoundException(id));
 
-            Supplier supplier = null;
-            if (dto.getSupplierId() != null && !dto.getSupplierId().isBlank()) {
-                supplier = supplierRepository.findById(dto.getSupplierId())
-                    .orElseThrow(() -> new IllegalArgumentException("Supplier not found: " + dto.getSupplierId()));
-            }
+        if (dto.getSku() != null && !dto.getSku().equals(product.getSku())
+                && productRepository.existsBySku(dto.getSku())) {
+            throw new DuplicateProductException(dto.getSku());
+        }
 
-            product.setName(dto.getName());
-            product.setDescription(dto.getDescription());
-            product.setSku(dto.getSku());
-            product.setPrice(dto.getPrice());
-            product.setStockQuantity(dto.getStockQuantity());
-            product.setCategory(category);
-            product.setSupplier(supplier);
+        Category category = categoryRepository.findById(dto.getCategoryId())
+            .orElseThrow(() -> new IllegalArgumentException("Category not found: " + dto.getCategoryId()));
 
-            return toResponseDto(productRepository.save(product));
-        });
+        Supplier supplier = null;
+        if (dto.getSupplierId() != null && !dto.getSupplierId().isBlank()) {
+            supplier = supplierRepository.findById(dto.getSupplierId())
+                .orElseThrow(() -> new IllegalArgumentException("Supplier not found: " + dto.getSupplierId()));
+        }
+
+        product.setName(dto.getName());
+        product.setDescription(dto.getDescription());
+        product.setSku(dto.getSku());
+        product.setPrice(dto.getPrice());
+        product.setStockQuantity(dto.getStockQuantity());
+        product.setCategory(category);
+        product.setSupplier(supplier);
+
+        return toResponseDto(productRepository.save(product));
     }
 
-    public Optional<GetProductDto> updateStockQuantity(String id, int newQuantity) {
-        return productRepository.findById(id).map(product -> {
-            product.setStockQuantity(newQuantity);
-            return toResponseDto(productRepository.save(product));
-        });
+    public GetProductDto updateStockQuantity(String id, int newQuantity) {
+        Product product = productRepository.findById(id)
+            .orElseThrow(() -> new ProductNotFoundException(id));
+        product.setStockQuantity(newQuantity);
+        return toResponseDto(productRepository.save(product));
     }
 
     public void deleteProduct(String id) {

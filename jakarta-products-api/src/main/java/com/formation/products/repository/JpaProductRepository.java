@@ -152,6 +152,15 @@ public class JpaProductRepository implements IProductRepository {
     }
 
     @Override
+    public boolean existsBySku(String sku) {
+        Long count = em.createQuery(
+            "SELECT COUNT(p) FROM Product p WHERE p.sku = :sku", Long.class)
+            .setParameter("sku", sku)
+            .getSingleResult();
+        return count > 0;
+    }
+
+    @Override
     public Optional<Product> findByIdWithGraph(String id) {
         Map<String, Object> hints = new HashMap<>();
         hints.put("jakarta.persistence.fetchgraph", em.getEntityGraph("Product.full"));

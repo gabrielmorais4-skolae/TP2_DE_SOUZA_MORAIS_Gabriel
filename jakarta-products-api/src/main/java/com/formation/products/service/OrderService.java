@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.formation.products.dtos.response.MostOrderedProduct;
+import com.formation.products.exception.InsufficientStockException;
+import com.formation.products.exception.ProductNotFoundException;
 import com.formation.products.model.Order;
 import com.formation.products.model.OrderItem;
 import com.formation.products.model.OrderStatus;
@@ -35,11 +37,16 @@ public class OrderService {
 
         for (Map.Entry<String, Integer> entry : productsAndQuantities.entrySet()) {
             Product product = productRepository.findById(entry.getKey())
-                .orElseThrow(() -> new IllegalArgumentException("Product not found: " + entry.getKey()));
+                .orElseThrow(() -> new ProductNotFoundException(entry.getKey()));
+
+            int requested = entry.getValue();
+            if (product.getStockQuantity() < requested) {
+                throw new InsufficientStockException(product.getName(), requested, product.getStockQuantity());
+            }
 
             OrderItem item = new OrderItem();
             item.setProduct(product);
-            item.setQuantity(entry.getValue());
+            item.setQuantity(requested);
             item.setUnitPrice(product.getPrice());
 
             order.addItem(item);

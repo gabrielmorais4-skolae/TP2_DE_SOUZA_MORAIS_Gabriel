@@ -6,6 +6,7 @@ import java.util.List;
 import com.formation.products.dtos.request.CreateProductDto;
 import com.formation.products.dtos.response.CategoryStats;
 import com.formation.products.dtos.response.GetProductDto;
+import com.formation.products.exception.ProductNotFoundException;
 import com.formation.products.service.ProductService;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -64,21 +65,17 @@ public class ProductController {
     @GET
     @Path("/{id}")
     public Response getProductById(@PathParam("id") String id) {
-        return productService.getProductById(id)
-            .map(dto -> Response.ok(dto).build())
-            .orElse(Response.status(Response.Status.NOT_FOUND)
-                    .entity(new ErrorMessage("Produit non trouvé"))
-                    .build());
+        GetProductDto dto = productService.getProductById(id)
+            .orElseThrow(() -> new ProductNotFoundException(id));
+        return Response.ok(dto).build();
     }
 
     @GET
     @Path("/{id}/full")
     public Response getProductByIdFull(@PathParam("id") String id) {
-        return productService.getProductByIdWithGraph(id)
-            .map(dto -> Response.ok(dto).build())
-            .orElse(Response.status(Response.Status.NOT_FOUND)
-                    .entity(new ErrorMessage("Produit non trouvé"))
-                    .build());
+        GetProductDto dto = productService.getProductByIdWithGraph(id)
+            .orElseThrow(() -> new ProductNotFoundException(id));
+        return Response.ok(dto).build();
     }
 
     @POST
@@ -94,22 +91,16 @@ public class ProductController {
     @Path("/{id}")
     public Response updateProduct(@PathParam("id") String id,
                                   @Valid CreateProductDto productDTO) {
-        return productService.updateProduct(id, productDTO)
-            .map(dto -> Response.ok(dto).build())
-            .orElse(Response.status(Response.Status.NOT_FOUND)
-                    .entity(new ErrorMessage("Produit non trouvé"))
-                    .build());
+        GetProductDto dto = productService.updateProduct(id, productDTO);
+        return Response.ok(dto).build();
     }
 
     @PATCH
     @Path("/{id}/stock")
     public Response updateStock(@PathParam("id") String id,
                                 StockUpdateRequest request) {
-        return productService.updateStockQuantity(id, request.getQuantity())
-            .map(dto -> Response.ok(dto).build())
-            .orElse(Response.status(Response.Status.NOT_FOUND)
-                    .entity(new ErrorMessage("Produit non trouvé"))
-                    .build());
+        GetProductDto dto = productService.updateStockQuantity(id, request.getQuantity());
+        return Response.ok(dto).build();
     }
 
     @DELETE
@@ -154,17 +145,6 @@ public class ProductController {
     @Path("/stats/categories-with-min-products")
     public Response categoriesWithMinProducts(@QueryParam("min") @jakarta.ws.rs.DefaultValue("1") int min) {
         return Response.ok(productService.findCategoriesWithMinProducts(min)).build();
-    }
-
-    public static class ErrorMessage {
-        private String message;
-
-        public ErrorMessage(String message) {
-            this.message = message;
-        }
-
-        public String getMessage() { return message; }
-        public void setMessage(String message) { this.message = message; }
     }
 
     public static class StockUpdateRequest {

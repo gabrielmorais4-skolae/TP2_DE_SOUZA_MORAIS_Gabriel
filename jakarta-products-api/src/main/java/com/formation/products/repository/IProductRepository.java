@@ -41,4 +41,6 @@ public interface IProductRepository {
     List<CategoryStats> findCategoryStats();
 
     Optional<Product> findByIdWithGraph(String id);
+
+    boolean existsBySku(String sku);
 }
