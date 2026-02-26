@@ -1,12 +1,16 @@
-# TP2 - Persistence avec JPA
+# TP2 & TP3 - Persistence JPA + Validation et Gestion des Erreurs
 
 ## Auteur
 
 De Souza Morais Gabriel
 
+## Framework
+
+Jakarta EE 10 — WildFly 30 + PostgreSQL 16
+
 ## Description
 
-API REST Jakarta EE avec persistence JPA complète déployée sur WildFly 30 + PostgreSQL 16.
+API REST Jakarta EE avec persistence JPA complète, validation des données et gestion structurée des erreurs.
 
 - 5 entités JPA : `Product`, `Category`, `Supplier`, `Order`, `OrderItem`
 - Relations complexes : `@ManyToOne`, `@OneToMany` (bidirectionnelles)
@@ -15,6 +19,10 @@ API REST Jakarta EE avec persistence JPA complète déployée sur WildFly 30 + P
 - DTOs pour les projections (request / response)
 - Statistiques d'agrégation (COUNT, AVG, SUM, GROUP BY)
 - Démonstration du problème N+1 et sa résolution
+- Validation déclarative (`@NotBlank`, `@Size`, `@DecimalMin`, `@Min`, `@Email`, `@PastOrPresent`)
+- Contraintes custom (`@ValidSKU`, `@ValidPrice`, `@ValidDateRange`)
+- Exception mappers JAX-RS pour des réponses d'erreur structurées
+- Validations métier (stock, SKU dupliqué, suppression de catégorie non vide)
 
 ## Run
 
@@ -129,35 +137,122 @@ L'API est disponible sur `http://localhost:8080/api`
 | `GET` | `/api/orders/stats/count-by-status` | Nombre de commandes par statut |
 | `GET` | `/api/orders/stats/most-ordered-products?limit=5` | Produits les plus commandés |
 
-## Captures d'écran
+## Validation Implémentée
 
-Les captures sont disponibles dans le dossier [`screens/`](screens/) :
+### Contraintes Standards
+
+| Entité | Champ | Contrainte |
+|--------|-------|------------|
+| `Product` | `name` | `@NotBlank`, `@Size(min=2, max=200)` |
+| `Product` | `price` | `@NotNull`, `@DecimalMin("0.01")`, `@Digits(integer=8, fraction=2)` |
+| `Product` | `stockQuantity` | `@NotNull`, `@Min(0)` |
+| `Category` | `name` | `@NotBlank`, `@Size(min=2, max=100)` |
+| `Order` | `customerEmail` | `@Email` |
+| `OrderItem` | `quantity` | `@Min(1)` |
+
+### Contraintes Custom
+
+| Annotation | Règle |
+|------------|-------|
+| `@ValidSKU` | Format `ABC123` — 3 lettres majuscules + 3 chiffres |
+| `@ValidPrice` | Maximum 2 décimales |
+| `@ValidDateRange` | `deliveryDate >= orderDate` (validation cross-champs) |
+
+## Gestion des Erreurs
+
+### Exception Mappers JAX-RS (`mapper/`)
+
+| Mapper | Exception | HTTP |
+|--------|-----------|------|
+| `ValidationExceptionMapper` | `ConstraintViolationException` | 400 + liste de champs |
+| `NotFoundExceptionMapper` | `ProductNotFoundException` | 404 |
+| `CategoryNotFoundExceptionMapper` | `CategoryNotFoundException` | 404 |
+| `ConflictExceptionMapper` | `DuplicateProductException` | 409 |
+| `CategoryNotEmptyExceptionMapper` | `CategoryNotEmptyException` | 409 |
+| `InsufficientStockExceptionMapper` | `InsufficientStockException` | 400 |
+| `GenericExceptionMapper` | `Exception` (fallback) | 500 |
+
+> Le `GenericExceptionMapper` désencapsule les exceptions wrappées par le CDI `@Transactional` de WildFly avant de déléguer au mapper spécifique.
+
+### Validations Métier
+
+- **SKU dupliqué** — vérifié à la création et mise à jour d’un produit (`existsBySku`)
+- **Stock insuffisant** — vérifié à la création d’une commande et via `decreaseStock`
+- **Suppression de catégorie non vide** — la catégorie doit avoir 0 produits avant suppression
+
+### Format de Réponse d’Erreur
+
+```json
+{
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Validation failed",
+  "timestamp": "2026-02-26T08:00:00",
+  "errors": [
+    {
+      "field": "price",
+      "message": "Price must be at least 0.01",
+      "rejectedValue": -10
+    }
+  ]
+}
+```
+
+```json
+{
+  "status": 404,
+  "error": "Not Found",
+  "message": "Product not found with ID: abc-123",
+  "timestamp": "2026-02-26T08:00:00"
+}
+```
+
+## Captures d’écran
+
+### TP2 — [`screens/tp2/`](screens/tp2/)
 
 | Fichier | Description |
 |---------|-------------|
 | `1.png` | Tables PostgreSQL générées par Hibernate |
 | `2.png` | Logs Hibernate (requêtes SQL formatées) |
 | `3.png` | Démonstration du problème N+1 (`/products/slow`) |
-| `4.0.png` | Requêtes d'agrégation |
+| `4.0.png` | Requêtes d’agrégation |
 | `4.1.png` | Statistiques catégories |
 | `4.2.png` | Produits jamais commandés |
 | `5.png` | Optimisation N+1 avec JOIN FETCH (`/products/fast`) |
-| `6.x.png` | Tests Thunder Client — CRUD complet |
+| `6.0.png` — `6.8.png` | Tests Thunder Client — CRUD complet |
+
+### TP3 — [`screens/tp3/`](screens/tp3/)
+
+| Fichier | Description |
+|---------|-------------|
+| `1.png` | Validation 400 — `price: -1200` déclenche `@DecimalMin` → "Price must be at least 0.01" |
+| `2.png` | Validation 400 — `price: 99.999` déclenche `@ValidPrice` + `@Digits` (2 erreurs simultanées) |
+| `3.0.png` | 404 structuré — `GET /api/products/toto` → "Product not found with ID: toto" |
+| `3.1.png` | 400 structuré — réponse JSON avec liste `errors[]` contenant champ, message et valeur rejetée |
+| `4.png` | 409 structuré — `DELETE /api/categories/{id}` → "Cannot delete category ‘Électronique’ because it still contains products" |
 
 ## Tests Effectués
 
 - [x] CRUD complet sur toutes les entités (Products, Categories, Suppliers, Orders)
 - [x] Relations bidirectionnelles fonctionnelles
 - [x] Transactions avec cascade (`CascadeType.ALL`, `orphanRemoval`)
-- [x] Requêtes d'agrégation (COUNT, AVG, SUM, GROUP BY)
+- [x] Requêtes d’agrégation (COUNT, AVG, SUM, GROUP BY)
 - [x] Démonstration du problème N+1 (`/products/slow` vs `/products/fast`)
 - [x] Entity Graphs pour chargement sélectif (`Product.withCategory`, `Product.full`)
 - [x] DTOs pour projections (`CategoryStats` via `SELECT NEW`)
 - [x] Filtrage par statut et email sur les commandes
 - [x] Mise à jour partielle du stock (`PATCH`)
 - [x] Script de seed automatisé (`seed.sh`)
+- [x] Validation échouée → 400 avec liste de champs invalides
+- [x] Contraintes custom `@ValidSKU`, `@ValidPrice`, `@ValidDateRange` fonctionnelles
+- [x] Produit non trouvé → 404 structuré
+- [x] SKU dupliqué → 409 structuré
+- [x] Catégorie avec produits → 409 à la suppression
+- [x] Stock insuffisant → 400 avec message clair
+- [x] Erreur inattendue → 500 générique
 
-Difficultés Rencontrées
+## Difficultés Rencontrées
 
 1. **Problème N+1**
 Lors du chargement des produits, Hibernate faisait trop de requêtes SQL (une par relation).
@@ -170,6 +265,10 @@ La connexion entre WildFly et PostgreSQL a demandé plusieurs ajustements (DataS
 Les relations bidirectionnelles causaient des boucles infinies en JSON.
 Solution : utiliser des DTOs au lieu d’exposer directement les entités.
 
+4. **Exception wrapping CDI + JAX-RS**
+Les exceptions lancées depuis des méthodes `@Transactional` CDI sont encapsulées par WildFly avant d’atteindre les mappers JAX-RS, les rendant invisibles aux mappers spécifiques.
+Solution : le `GenericExceptionMapper` parcourt la chaîne de causes et délègue au mapper approprié.
+
 ## Points Clés Appris
 
 1. JOIN FETCH est essentiel pour éviter le problème N+1 en LAZY.
@@ -177,3 +276,7 @@ Solution : utiliser des DTOs au lieu d’exposer directement les entités.
 2. Les Entity Graphs permettent de choisir quelles relations charger selon le besoin.
 
 3. Les DTOs projetés (SELECT NEW ...) sont plus efficaces que charger des entités complètes.
+
+4. Les `@Provider` JAX-RS sont auto-découverts quand la classe `Application` est vide.
+
+5. En Jakarta EE, les `RuntimeException` lancées depuis des beans CDI `@Transactional` peuvent être wrappées — le mapper générique doit désencapsuler la cause pour déléguer correctement.
