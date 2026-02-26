@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import com.formation.products.dtos.request.CreateCategoryDto;
 import com.formation.products.dtos.response.GetCategoryDto;
+import com.formation.products.exception.CategoryNotEmptyException;
+import com.formation.products.exception.CategoryNotFoundException;
 import com.formation.products.model.Category;
 import com.formation.products.repository.ICategoryRepository;
 
@@ -45,14 +47,21 @@ public class CategoryService {
         return categoryRepository.findWithProducts(id).map(this::toDtoWithProducts);
     }
 
-    public Optional<GetCategoryDto> updateCategory(String id, CreateCategoryDto dto) {
-        return categoryRepository.findById(id).map(category -> {
-            category.setName(dto.getName());
-            return toDto(categoryRepository.save(category));
-        });
+    public GetCategoryDto updateCategory(String id, CreateCategoryDto dto) {
+        Category category = categoryRepository.findById(id)
+            .orElseThrow(() -> new CategoryNotFoundException(id));
+        category.setName(dto.getName());
+        return toDto(categoryRepository.save(category));
     }
 
     public void deleteCategory(String id) {
+        Category category = categoryRepository.findWithProducts(id)
+            .orElseThrow(() -> new CategoryNotFoundException(id));
+
+        if (!category.getProducts().isEmpty()) {
+            throw new CategoryNotEmptyException(category.getName());
+        }
+
         categoryRepository.deleteById(id);
     }
 

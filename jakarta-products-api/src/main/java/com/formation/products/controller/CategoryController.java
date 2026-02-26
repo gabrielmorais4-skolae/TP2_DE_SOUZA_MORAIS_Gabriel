@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.formation.products.dtos.request.CreateCategoryDto;
 import com.formation.products.dtos.response.GetCategoryDto;
+import com.formation.products.exception.CategoryNotFoundException;
 import com.formation.products.service.CategoryService;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -44,11 +45,9 @@ public class CategoryController {
     @GET
     @Path("/{id}")
     public Response getCategoryById(@PathParam("id") String id) {
-        return categoryService.getCategoryById(id)
-            .map(dto -> Response.ok(dto).build())
-            .orElse(Response.status(Response.Status.NOT_FOUND)
-                    .entity(new ErrorMessage("Catégorie non trouvée"))
-                    .build());
+        GetCategoryDto dto = categoryService.getCategoryById(id)
+            .orElseThrow(() -> new CategoryNotFoundException(id));
+        return Response.ok(dto).build();
     }
 
     @POST
@@ -61,11 +60,8 @@ public class CategoryController {
     @PUT
     @Path("/{id}")
     public Response updateCategory(@PathParam("id") String id, @Valid CreateCategoryDto dto) {
-        return categoryService.updateCategory(id, dto)
-            .map(updated -> Response.ok(updated).build())
-            .orElse(Response.status(Response.Status.NOT_FOUND)
-                    .entity(new ErrorMessage("Catégorie non trouvée"))
-                    .build());
+        GetCategoryDto updated = categoryService.updateCategory(id, dto);
+        return Response.ok(updated).build();
     }
 
     @DELETE
@@ -73,14 +69,5 @@ public class CategoryController {
     public Response deleteCategory(@PathParam("id") String id) {
         categoryService.deleteCategory(id);
         return Response.noContent().build();
-    }
-
-    public static class ErrorMessage {
-        private String message;
-
-        public ErrorMessage(String message) { this.message = message; }
-
-        public String getMessage() { return message; }
-        public void setMessage(String message) { this.message = message; }
     }
 }

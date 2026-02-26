@@ -10,6 +10,7 @@ import com.formation.products.dtos.response.GetCategoryDto;
 import com.formation.products.dtos.response.GetProductDto;
 import com.formation.products.dtos.response.GetSupplierDto;
 import com.formation.products.exception.DuplicateProductException;
+import com.formation.products.exception.InsufficientStockException;
 import com.formation.products.exception.ProductNotFoundException;
 import com.formation.products.model.Category;
 import com.formation.products.model.Product;
@@ -146,11 +147,23 @@ public class ProductService {
     @Transactional
     public void updateStock(String productId, int quantity) {
         Product product = productRepository.findById(productId)
-            .orElseThrow(() -> new IllegalArgumentException("Product not found: " + productId));
+            .orElseThrow(() -> new ProductNotFoundException(productId));
 
         product.setStockQuantity(quantity);
 
         productRepository.save(product);
+    }
+
+    @Transactional
+    public void decreaseStock(String productId, int quantity) {
+        Product product = productRepository.findById(productId)
+            .orElseThrow(() -> new ProductNotFoundException(productId));
+
+        if (product.getStockQuantity() < quantity) {
+            throw new InsufficientStockException(product.getName(), quantity, product.getStockQuantity());
+        }
+
+        product.setStockQuantity(product.getStockQuantity() - quantity);
     }
 
     @Transactional
