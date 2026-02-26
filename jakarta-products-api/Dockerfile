@@ -34,4 +34,4 @@ RUN bash -c 'cp /tmp/products-api-1.0.0.war $JBOSS_HOME/standalone/deployments/'
 
 EXPOSE 8080 9990
 
-CMD ["/bin/bash", "-c", "$JBOSS_HOME/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0"]
+CMD ["/bin/bash", "-c", "$JBOSS_HOME/bin/standalone.sh -c standalone-microprofile.xml -b 0.0.0.0 -bmanagement 0.0.0.0"]

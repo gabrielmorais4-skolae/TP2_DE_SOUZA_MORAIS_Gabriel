@@ -3,6 +3,8 @@ package com.formation.products.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
 import com.formation.products.dtos.request.CreateOrderDto;
 import com.formation.products.dtos.response.GetOrderDto;
 import com.formation.products.dtos.response.GetOrderItemDto;
@@ -27,6 +29,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+@Tag(name = "Orders")
 @Path("/orders")
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)

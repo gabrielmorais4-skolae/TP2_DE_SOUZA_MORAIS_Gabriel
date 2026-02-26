@@ -1,5 +1,5 @@
 #!/bin/bash
-BASE="http://localhost:8080/api"
+BASE="http://localhost:8080/api/v1"
 
 echo "=== 1. CATEGORIES ==="
 CAT1=$(curl -s -X POST "$BASE/categories" \

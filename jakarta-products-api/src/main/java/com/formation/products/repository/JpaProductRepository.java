@@ -146,6 +146,16 @@ public class JpaProductRepository implements IProductRepository {
     }
 
     @Override
+    public List<Product> findPaged(int page, int size) {
+        TypedQuery<Product> query = em.createQuery(
+            "SELECT p FROM Product p LEFT JOIN FETCH p.category LEFT JOIN FETCH p.supplier ORDER BY p.name",
+            Product.class);
+        query.setFirstResult(page * size);
+        query.setMaxResults(size);
+        return query.getResultList();
+    }
+
+    @Override
     public List<Product> findAllSlow() {
         return em.createQuery("SELECT p FROM Product p", Product.class)
             .getResultList();

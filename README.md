@@ -1,4 +1,4 @@
-# TP2 & TP3 - Persistence JPA + Validation et Gestion des Erreurs
+# TP2 → TP4 - Products API — Jakarta EE / JEE
 
 ## Auteur
 
@@ -6,29 +6,38 @@ De Souza Morais Gabriel
 
 ## Framework
 
-Jakarta EE 10 — WildFly 30 + PostgreSQL 16
+**Jakarta EE 10** — WildFly (MicroProfile profile) + PostgreSQL 16
 
 ## Description
 
-API REST Jakarta EE avec persistence JPA complète, validation des données et gestion structurée des erreurs.
+API REST Jakarta EE complète avec architecture 4 couches, persistence JPA, validation, gestion structurée des erreurs, pagination et documentation OpenAPI interactive.
 
-- 5 entités JPA : `Product`, `Category`, `Supplier`, `Order`, `OrderItem`
-- Relations complexes : `@ManyToOne`, `@OneToMany` (bidirectionnelles)
-- Requêtes JPQL optimisées avec `JOIN FETCH` et `Entity Graphs`
-- Transactions JTA gérées via `@Transactional`
-- DTOs pour les projections (request / response)
-- Statistiques d'agrégation (COUNT, AVG, SUM, GROUP BY)
-- Démonstration du problème N+1 et sa résolution
-- Validation déclarative (`@NotBlank`, `@Size`, `@DecimalMin`, `@Min`, `@Email`, `@PastOrPresent`)
-- Contraintes custom (`@ValidSKU`, `@ValidPrice`, `@ValidDateRange`)
-- Exception mappers JAX-RS pour des réponses d'erreur structurées
-- Validations métier (stock, SKU dupliqué, suppression de catégorie non vide)
+- **Architecture** : 4 couches séparées (Presentation / Application / Domain / Infrastructure) avec interfaces Repository
+- **5 entités JPA** : `Product`, `Category`, `Supplier`, `Order`, `OrderItem`
+- **Relations** : `@ManyToOne`, `@OneToMany` bidirectionnelles avec `CASCADE` et `orphanRemoval`
+- **Requêtes JPQL** optimisées avec `LEFT JOIN FETCH` et Entity Graphs (anti N+1)
+- **Transactions** JTA via `@Transactional` CDI
+- **Validation** : Bean Validation + contraintes custom (`@ValidSKU`, `@ValidPrice`, `@ValidDateRange`)
+- **Exception Mappers** JAX-RS pour des réponses d'erreur structurées (400 / 404 / 409 / 500)
+- **Pagination** : `GET /api/v1/products?page=0&size=10` avec métadonnées
+- **Versioning** : Tous les endpoints sous `/api/v1`
+- **Swagger UI** : Documentation interactive via MicroProfile OpenAPI (`/openapi-ui/`)
 
-## Run
+## Lancement rapide
 
 ```bash
-docker compose up -d
+# Démarrer PostgreSQL + WildFly (MicroProfile profile avec OpenAPI)
+docker compose up --build
+
+# Peupler la base avec des données de test
+chmod +x seed.sh && ./seed.sh
 ```
+
+| URL | Description |
+|-----|-------------|
+| `http://localhost:8080/api/v1` | Base de l'API (v1) |
+| `http://localhost:8080/openapi` | Spec OpenAPI (JSON/YAML) |
+| `http://localhost:8080/openapi-ui/` | Swagger UI interactif |
 
 ## Modèle de Données
 
@@ -67,75 +76,64 @@ docker compose up -d
 
 **Statuts de commande :** `PENDING` → `CONFIRMED` → `SHIPPED` → `DELIVERED` | `CANCELLED`
 
-## Lancement
-
-```bash
-# Démarrer PostgreSQL + WildFly
-docker compose up --build
-
-# Peupler la base avec des données de test
-chmod +x seed.sh && ./seed.sh
-```
-
-L'API est disponible sur `http://localhost:8080/api`
-
 ## Endpoints
 
-### Products (`/api/products`)
+### Products (`/api/v1/products`)
 
 | Méthode | URL | Description |
 |---------|-----|-------------|
-| `GET` | `/api/products` | Liste tous les produits (JOIN FETCH optimisé) |
-| `GET` | `/api/products?category={name}` | Filtre par nom de catégorie |
-| `GET` | `/api/products/slow` | Liste sans JOIN FETCH (démo N+1) |
-| `GET` | `/api/products/fast` | Liste avec JOIN FETCH (solution N+1) |
-| `GET` | `/api/products/{id}` | Détail d'un produit |
-| `GET` | `/api/products/{id}/full` | Détail avec Entity Graph (category + supplier) |
-| `POST` | `/api/products` | Créer un produit |
-| `PUT` | `/api/products/{id}` | Mettre à jour un produit |
-| `PATCH` | `/api/products/{id}/stock` | Mettre à jour le stock |
-| `DELETE` | `/api/products/{id}` | Supprimer un produit |
-| `GET` | `/api/products/stats/count-by-category` | Nombre de produits par catégorie |
-| `GET` | `/api/products/stats/avg-price-by-category` | Prix moyen par catégorie |
-| `GET` | `/api/products/stats/top-expensive?limit=10` | Top N produits les plus chers |
-| `GET` | `/api/products/stats/never-ordered` | Produits jamais commandés |
-| `GET` | `/api/products/stats/category-stats` | Stats complètes par catégorie (DTO projeté) |
-| `GET` | `/api/products/stats/categories-with-min-products?min=1` | Catégories avec au moins N produits |
+| `GET` | `/api/v1/products` | Liste tous les produits (JOIN FETCH optimisé) |
+| `GET` | `/api/v1/products?page=0&size=10` | **Pagination** — page courante + métadonnées |
+| `GET` | `/api/v1/products?category={id}` | Filtre par catégorie |
+| `GET` | `/api/v1/products/slow` | Liste sans JOIN FETCH (démo N+1) |
+| `GET` | `/api/v1/products/fast` | Liste avec JOIN FETCH (solution N+1) |
+| `GET` | `/api/v1/products/{id}` | Détail d'un produit |
+| `GET` | `/api/v1/products/{id}/full` | Détail avec Entity Graph (category + supplier) |
+| `POST` | `/api/v1/products` | Créer un produit |
+| `PUT` | `/api/v1/products/{id}` | Mettre à jour un produit |
+| `PATCH` | `/api/v1/products/{id}/stock` | Mettre à jour le stock |
+| `DELETE` | `/api/v1/products/{id}` | Supprimer un produit |
+| `GET` | `/api/v1/products/stats/count-by-category` | Nombre de produits par catégorie |
+| `GET` | `/api/v1/products/stats/avg-price-by-category` | Prix moyen par catégorie |
+| `GET` | `/api/v1/products/stats/top-expensive?limit=10` | Top N produits les plus chers |
+| `GET` | `/api/v1/products/stats/never-ordered` | Produits jamais commandés |
+| `GET` | `/api/v1/products/stats/category-stats` | Stats complètes par catégorie (DTO projeté) |
+| `GET` | `/api/v1/products/stats/categories-with-min-products?min=1` | Catégories avec au moins N produits |
 
-### Categories (`/api/categories`)
-
-| Méthode | URL | Description |
-|---------|-----|-------------|
-| `GET` | `/api/categories` | Liste toutes les catégories |
-| `GET` | `/api/categories/{id}` | Détail d'une catégorie |
-| `POST` | `/api/categories` | Créer une catégorie |
-| `PUT` | `/api/categories/{id}` | Mettre à jour une catégorie |
-| `DELETE` | `/api/categories/{id}` | Supprimer une catégorie |
-
-### Suppliers (`/api/suppliers`)
+### Categories (`/api/v1/categories`)
 
 | Méthode | URL | Description |
 |---------|-----|-------------|
-| `GET` | `/api/suppliers` | Liste tous les fournisseurs |
-| `GET` | `/api/suppliers/{id}` | Détail d'un fournisseur |
-| `POST` | `/api/suppliers` | Créer un fournisseur |
-| `PUT` | `/api/suppliers/{id}` | Mettre à jour un fournisseur |
-| `DELETE` | `/api/suppliers/{id}` | Supprimer un fournisseur |
+| `GET` | `/api/v1/categories` | Liste toutes les catégories |
+| `GET` | `/api/v1/categories/{id}` | Détail d'une catégorie |
+| `POST` | `/api/v1/categories` | Créer une catégorie |
+| `PUT` | `/api/v1/categories/{id}` | Mettre à jour une catégorie |
+| `DELETE` | `/api/v1/categories/{id}` | Supprimer une catégorie |
 
-### Orders (`/api/orders`)
+### Suppliers (`/api/v1/suppliers`)
 
 | Méthode | URL | Description |
 |---------|-----|-------------|
-| `POST` | `/api/orders` | Créer une commande (avec items) |
-| `GET` | `/api/orders` | Liste toutes les commandes |
-| `GET` | `/api/orders?status={STATUS}` | Filtre par statut |
-| `GET` | `/api/orders?email={email}` | Filtre par email client |
-| `GET` | `/api/orders/{id}` | Détail d'une commande |
-| `PUT` | `/api/orders/{id}/status` | Mettre à jour le statut |
-| `DELETE` | `/api/orders/{id}` | Supprimer une commande |
-| `GET` | `/api/orders/stats/total-revenue` | Chiffre d'affaires total (DELIVERED) |
-| `GET` | `/api/orders/stats/count-by-status` | Nombre de commandes par statut |
-| `GET` | `/api/orders/stats/most-ordered-products?limit=5` | Produits les plus commandés |
+| `GET` | `/api/v1/suppliers` | Liste tous les fournisseurs |
+| `GET` | `/api/v1/suppliers/{id}` | Détail d'un fournisseur |
+| `POST` | `/api/v1/suppliers` | Créer un fournisseur |
+| `PUT` | `/api/v1/suppliers/{id}` | Mettre à jour un fournisseur |
+| `DELETE` | `/api/v1/suppliers/{id}` | Supprimer un fournisseur |
+
+### Orders (`/api/v1/orders`)
+
+| Méthode | URL | Description |
+|---------|-----|-------------|
+| `POST` | `/api/v1/orders` | Créer une commande (avec items) |
+| `GET` | `/api/v1/orders` | Liste toutes les commandes |
+| `GET` | `/api/v1/orders?status={STATUS}` | Filtre par statut |
+| `GET` | `/api/v1/orders?email={email}` | Filtre par email client |
+| `GET` | `/api/v1/orders/{id}` | Détail d'une commande |
+| `PUT` | `/api/v1/orders/{id}/status` | Mettre à jour le statut |
+| `DELETE` | `/api/v1/orders/{id}` | Supprimer une commande |
+| `GET` | `/api/v1/orders/stats/total-revenue` | Chiffre d'affaires total (DELIVERED) |
+| `GET` | `/api/v1/orders/stats/count-by-status` | Nombre de commandes par statut |
+| `GET` | `/api/v1/orders/stats/most-ordered-products?limit=5` | Produits les plus commandés |
 
 ## Validation Implémentée
 
@@ -251,6 +249,9 @@ L'API est disponible sur `http://localhost:8080/api`
 - [x] Catégorie avec produits → 409 à la suppression
 - [x] Stock insuffisant → 400 avec message clair
 - [x] Erreur inattendue → 500 générique
+- [x] Pagination — `GET /api/v1/products?page=0&size=5` → réponse avec `data`, `totalElements`, `totalPages`
+- [x] Versioning — tous les endpoints sous `/api/v1`
+- [x] Swagger UI accessible à `http://localhost:8080/openapi-ui/`
 
 ## Difficultés Rencontrées
 

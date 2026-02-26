@@ -16,6 +16,8 @@ public interface IProductRepository {
 
     List<Product> findAll();
 
+    List<Product> findPaged(int page, int size);
+
     List<Product> findAllSlow();
 
     List<Product> findByCategory(String categoryId);

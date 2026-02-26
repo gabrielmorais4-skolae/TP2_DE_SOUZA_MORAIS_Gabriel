@@ -9,6 +9,8 @@ import com.formation.products.dtos.response.CategoryStats;
 import com.formation.products.dtos.response.GetCategoryDto;
 import com.formation.products.dtos.response.GetProductDto;
 import com.formation.products.dtos.response.GetSupplierDto;
+import com.formation.products.dtos.response.PagedResponse;
+import com.formation.products.exception.CategoryNotFoundException;
 import com.formation.products.exception.DuplicateProductException;
 import com.formation.products.exception.InsufficientStockException;
 import com.formation.products.exception.ProductNotFoundException;
@@ -22,6 +24,7 @@ import com.formation.products.repository.ISupplierRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.NotFoundException;
 
 @ApplicationScoped
 @Transactional
@@ -42,12 +45,12 @@ public class ProductService {
         }
 
         Category category = categoryRepository.findById(dto.getCategoryId())
-            .orElseThrow(() -> new IllegalArgumentException("Category not found: " + dto.getCategoryId()));
+            .orElseThrow(() -> new CategoryNotFoundException(dto.getCategoryId()));
 
         Supplier supplier = null;
         if (dto.getSupplierId() != null && !dto.getSupplierId().isBlank()) {
             supplier = supplierRepository.findById(dto.getSupplierId())
-                .orElseThrow(() -> new IllegalArgumentException("Supplier not found: " + dto.getSupplierId()));
+                .orElseThrow(() -> new NotFoundException("Supplier not found: " + dto.getSupplierId()));
         }
 
         Product product = new Product();
@@ -60,6 +63,14 @@ public class ProductService {
         product.setSupplier(supplier);
 
         return toResponseDto(productRepository.save(product));
+    }
+
+    public PagedResponse<GetProductDto> getProductsPaged(int page, int size) {
+        List<GetProductDto> products = productRepository.findPaged(page, size).stream()
+            .map(this::toResponseDto)
+            .collect(Collectors.toList());
+        long total = productRepository.count();
+        return new PagedResponse<>(products, page, size, total);
     }
 
     public Optional<GetProductDto> getProductById(String id) {
@@ -98,12 +109,12 @@ public class ProductService {
         }
 
         Category category = categoryRepository.findById(dto.getCategoryId())
-            .orElseThrow(() -> new IllegalArgumentException("Category not found: " + dto.getCategoryId()));
+            .orElseThrow(() -> new CategoryNotFoundException(dto.getCategoryId()));
 
         Supplier supplier = null;
         if (dto.getSupplierId() != null && !dto.getSupplierId().isBlank()) {
             supplier = supplierRepository.findById(dto.getSupplierId())
-                .orElseThrow(() -> new IllegalArgumentException("Supplier not found: " + dto.getSupplierId()));
+                .orElseThrow(() -> new NotFoundException("Supplier not found: " + dto.getSupplierId()));
         }
 
         product.setName(dto.getName());
@@ -169,7 +180,7 @@ public class ProductService {
     @Transactional
     public void transferProducts(String fromCategoryId, String toCategoryId) {
         Category toCategory = categoryRepository.findById(toCategoryId)
-            .orElseThrow(() -> new IllegalArgumentException("Target category not found: " + toCategoryId));
+            .orElseThrow(() -> new CategoryNotFoundException(toCategoryId));
 
         List<Product> products = productRepository.findByCategory(fromCategoryId);
         for (Product product : products) {

@@ -18,6 +18,7 @@ import com.formation.products.repository.IProductRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.NotFoundException;
 
 @ApplicationScoped
 public class OrderService {
@@ -59,7 +60,7 @@ public class OrderService {
     @Transactional
     public void updateOrderStatus(Long orderId, OrderStatus newStatus) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
+            .orElseThrow(() -> new NotFoundException("Order not found: " + orderId));
         order.setStatus(newStatus);
         orderRepository.save(order);
     }

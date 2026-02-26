@@ -24,6 +24,11 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
+@Tag(name = "Categories")
 @Path("/categories")
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
@@ -37,6 +42,8 @@ public class CategoryController {
     UriInfo uriInfo;
 
     @GET
+    @Operation(summary = "List all categories")
+    @APIResponse(responseCode = "200", description = "Categories retrieved successfully")
     public Response getAllCategories() {
         List<GetCategoryDto> categories = categoryService.getAllCategories();
         return Response.ok(categories).build();
@@ -44,6 +51,9 @@ public class CategoryController {
 
     @GET
     @Path("/{id}")
+    @Operation(summary = "Get category by ID")
+    @APIResponse(responseCode = "200", description = "Category found")
+    @APIResponse(responseCode = "404", description = "Category not found")
     public Response getCategoryById(@PathParam("id") String id) {
         GetCategoryDto dto = categoryService.getCategoryById(id)
             .orElseThrow(() -> new CategoryNotFoundException(id));
@@ -51,6 +61,9 @@ public class CategoryController {
     }
 
     @POST
+    @Operation(summary = "Create a category")
+    @APIResponse(responseCode = "201", description = "Category created successfully")
+    @APIResponse(responseCode = "400", description = "Validation error")
     public Response createCategory(@Valid CreateCategoryDto dto) {
         GetCategoryDto created = categoryService.createCategory(dto);
         URI location = uriInfo.getAbsolutePathBuilder().path(created.getId()).build();
@@ -59,6 +72,10 @@ public class CategoryController {
 
     @PUT
     @Path("/{id}")
+    @Operation(summary = "Update a category")
+    @APIResponse(responseCode = "200", description = "Category updated successfully")
+    @APIResponse(responseCode = "400", description = "Validation error")
+    @APIResponse(responseCode = "404", description = "Category not found")
     public Response updateCategory(@PathParam("id") String id, @Valid CreateCategoryDto dto) {
         GetCategoryDto updated = categoryService.updateCategory(id, dto);
         return Response.ok(updated).build();
@@ -66,6 +83,10 @@ public class CategoryController {
 
     @DELETE
     @Path("/{id}")
+    @Operation(summary = "Delete a category")
+    @APIResponse(responseCode = "204", description = "Category deleted")
+    @APIResponse(responseCode = "404", description = "Category not found")
+    @APIResponse(responseCode = "409", description = "Category still contains products")
     public Response deleteCategory(@PathParam("id") String id) {
         categoryService.deleteCategory(id);
         return Response.noContent().build();

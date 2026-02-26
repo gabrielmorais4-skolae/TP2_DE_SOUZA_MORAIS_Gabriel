@@ -3,6 +3,8 @@ package com.formation.products.controller;
 import java.net.URI;
 import java.util.List;
 
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
 import com.formation.products.dtos.request.CreateSupplierDto;
 import com.formation.products.dtos.response.GetSupplierDto;
 import com.formation.products.service.SupplierService;
@@ -23,6 +25,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
+@Tag(name = "Suppliers")
 @Path("/suppliers")
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)

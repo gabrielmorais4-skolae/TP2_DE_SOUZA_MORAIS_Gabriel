@@ -1,4 +1,4 @@
-embed-server --std-out=echo
+embed-server --std-out=echo --server-config=standalone-microprofile.xml
 
 batch
 

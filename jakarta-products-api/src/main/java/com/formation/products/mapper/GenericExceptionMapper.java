@@ -8,6 +8,7 @@ import com.formation.products.exception.InsufficientStockException;
 import com.formation.products.exception.ProductNotFoundException;
 
 import jakarta.validation.ConstraintViolationException;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
@@ -22,6 +23,9 @@ public class GenericExceptionMapper implements ExceptionMapper<Exception> {
         // WildFly CDI @Transactional wraps RuntimeExceptions — unwrap and delegate
         Throwable cause = exception;
         while (cause != null) {
+            if (cause instanceof WebApplicationException e) {
+                return e.getResponse();
+            }
             if (cause instanceof ProductNotFoundException e) {
                 return new NotFoundExceptionMapper().toResponse(e);
             }
