@@ -18,6 +18,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -45,8 +46,8 @@ public class Product {
     @Column(name = "id", nullable = false, updatable = false)
     private String id;
 
-    @NotBlank
-    @Size(max = 200)
+    @NotBlank(message = "Product name is required")
+    @Size(min = 2, max = 200, message = "Name must be between 2 and 200 characters")
     @Column(name = "name", nullable = false, length = 200)
     private String name;
 
@@ -54,13 +55,14 @@ public class Product {
     @Column(name = "description", length = 1000)
     private String description;
 
-    @NotNull
-    @DecimalMin("0.01")
+@NotNull(message = "Price is required")
+    @DecimalMin(value = "0.01", message = "Price must be at least 0.01")
+    @Digits(integer = 8, fraction = 2, message = "Price must have at most 8 integer digits and 2 decimal places")
     @Column(name = "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    @NotNull
-    @Min(0)
+    @NotNull(message = "Stock quantity is required")
+    @Min(value = 0, message = "Stock quantity cannot be negative")
     @Column(name = "stock_quantity", nullable = false)
     private Integer stockQuantity;
 
@@ -70,6 +72,7 @@ public class Product {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @NotNull(message = "Category is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;

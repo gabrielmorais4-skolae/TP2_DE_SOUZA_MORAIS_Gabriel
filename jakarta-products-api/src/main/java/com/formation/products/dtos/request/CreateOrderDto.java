@@ -8,13 +8,14 @@ import jakarta.validation.constraints.NotEmpty;
 
 public class CreateOrderDto {
 
-    @NotBlank
+    @NotBlank(message = "Customer name is required")
     private String customerName;
 
-    @Email
+    @NotBlank(message = "Customer email is required")
+    @Email(message = "Customer email must be valid")
     private String customerEmail;
 
-    @NotEmpty
+    @NotEmpty(message = "Order must contain at least one product")
     private Map<String, Integer> productsAndQuantities;
 
     public String getCustomerName() { return customerName; }

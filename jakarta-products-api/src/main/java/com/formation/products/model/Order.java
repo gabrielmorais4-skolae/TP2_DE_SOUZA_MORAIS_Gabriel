@@ -18,7 +18,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "orders")
@@ -32,23 +38,31 @@ public class Order {
     @Column(name = "order_number", unique = true, nullable = false, length = 50)
     private String orderNumber;
 
-    @NotBlank
+    @NotBlank(message = "Customer name is required")
+    @Size(min = 2, max = 100, message = "Customer name must be between 2 and 100 characters")
     @Column(name = "customer_name", nullable = false, length = 200)
     private String customerName;
 
+    @NotBlank(message = "Customer email is required")
+    @Email(message = "Customer email must be valid")
     @Column(name = "customer_email", length = 200)
     private String customerEmail;
 
+    @NotNull(message = "Status is required")
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private OrderStatus status;
 
+    @NotNull(message = "Total amount is required")
+    @DecimalMin(value = "0.01", message = "Total amount must be at least 0.01")
     @Column(name = "total_amount", precision = 10, scale = 2)
     private BigDecimal totalAmount;
 
+    @PastOrPresent(message = "Order date must be in the past or present")
     @Column(name = "order_date", updatable = false)
     private LocalDateTime orderDate;
 
+    @NotEmpty(message = "Order must contain at least one item")
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<OrderItem> items = new ArrayList<>();
 

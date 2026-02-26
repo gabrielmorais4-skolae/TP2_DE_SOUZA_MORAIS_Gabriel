@@ -13,6 +13,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
@@ -35,11 +37,13 @@ public class OrderItem {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @Min(1)
+    @Min(value = 1, message = "Quantity must be at least 1")
+    @Max(value = 1000, message = "Quantity must not exceed 1000")
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
-    @NotNull
+    @NotNull(message = "Unit price is required")
+    @DecimalMin(value = "0.01", message = "Unit price must be at least 0.01")
     @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal unitPrice;
 

@@ -3,6 +3,7 @@ package com.formation.products.dtos.request;
 import java.math.BigDecimal;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -11,14 +12,15 @@ import jakarta.validation.constraints.Size;
 public class CreateProductDto {
 
     @NotBlank(message = "Name is required")
-    @Size(min = 1, max = 100, message = "Name must be between 1 and 100 characters")
+    @Size(min = 2, max = 200, message = "Name must be between 2 and 200 characters")
     private String name;
 
-    @Size(max = 500, message = "Description too long")
+    @Size(max = 1000, message = "Description must not exceed 1000 characters")
     private String description;
 
     @NotNull(message = "Price is required")
-    @DecimalMin(value = "0.01", message = "Price must be positive")
+    @DecimalMin(value = "0.01", message = "Price must be at least 0.01")
+    @Digits(integer = 8, fraction = 2, message = "Price must have at most 8 integer digits and 2 decimal places")
     private BigDecimal price;
 
     @NotBlank(message = "Category is required")
@@ -26,6 +28,7 @@ public class CreateProductDto {
 
     private String supplierId;
 
+    @NotNull(message = "Stock quantity is required")
     @Min(value = 0, message = "Stock cannot be negative")
     private Integer stockQuantity;
 
