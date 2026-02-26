@@ -8,6 +8,7 @@ public class GetProductDto {
     private String id;
     private String name;
     private String description;
+    private String sku;
     private BigDecimal price;
     private GetCategoryDto category;
     private GetSupplierDto supplier;
@@ -25,6 +26,9 @@ public class GetProductDto {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    public String getSku() { return sku; }
+    public void setSku(String sku) { this.sku = sku; }
 
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }

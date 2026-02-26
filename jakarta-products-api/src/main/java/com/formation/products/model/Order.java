@@ -18,6 +18,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import com.formation.products.validation.ValidDateRange;
+
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -26,6 +28,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
 
+@ValidDateRange
 @Entity
 @Table(name = "orders")
 public class Order {
@@ -61,6 +64,9 @@ public class Order {
     @PastOrPresent(message = "Order date must be in the past or present")
     @Column(name = "order_date", updatable = false)
     private LocalDateTime orderDate;
+
+    @Column(name = "delivery_date")
+    private LocalDateTime deliveryDate;
 
     @NotEmpty(message = "Order must contain at least one item")
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -109,6 +115,9 @@ public class Order {
 
     public LocalDateTime getOrderDate() { return orderDate; }
     public void setOrderDate(LocalDateTime orderDate) { this.orderDate = orderDate; }
+
+    public LocalDateTime getDeliveryDate() { return deliveryDate; }
+    public void setDeliveryDate(LocalDateTime deliveryDate) { this.deliveryDate = deliveryDate; }
 
     public List<OrderItem> getItems() { return items; }
     public void setItems(List<OrderItem> items) { this.items = items; }

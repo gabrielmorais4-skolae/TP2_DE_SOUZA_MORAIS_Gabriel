@@ -2,6 +2,9 @@ package com.formation.products.dtos.request;
 
 import java.math.BigDecimal;
 
+import com.formation.products.validation.ValidPrice;
+import com.formation.products.validation.ValidSKU;
+
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
@@ -18,9 +21,13 @@ public class CreateProductDto {
     @Size(max = 1000, message = "Description must not exceed 1000 characters")
     private String description;
 
+    @ValidSKU
+    private String sku;
+
     @NotNull(message = "Price is required")
     @DecimalMin(value = "0.01", message = "Price must be at least 0.01")
     @Digits(integer = 8, fraction = 2, message = "Price must have at most 8 integer digits and 2 decimal places")
+    @ValidPrice
     private BigDecimal price;
 
     @NotBlank(message = "Category is required")
@@ -39,6 +46,9 @@ public class CreateProductDto {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    public String getSku() { return sku; }
+    public void setSku(String sku) { this.sku = sku; }
 
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }

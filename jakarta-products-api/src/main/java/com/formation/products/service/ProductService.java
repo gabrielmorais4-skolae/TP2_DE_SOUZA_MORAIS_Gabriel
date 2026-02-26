@@ -46,6 +46,7 @@ public class ProductService {
         Product product = new Product();
         product.setName(dto.getName());
         product.setDescription(dto.getDescription());
+        product.setSku(dto.getSku());
         product.setPrice(dto.getPrice());
         product.setStockQuantity(dto.getStockQuantity());
         product.setCategory(category);
@@ -93,6 +94,7 @@ public class ProductService {
 
             product.setName(dto.getName());
             product.setDescription(dto.getDescription());
+            product.setSku(dto.getSku());
             product.setPrice(dto.getPrice());
             product.setStockQuantity(dto.getStockQuantity());
             product.setCategory(category);
@@ -203,6 +205,7 @@ public class ProductService {
         dto.setId(entity.getId());
         dto.setName(entity.getName());
         dto.setDescription(entity.getDescription());
+        dto.setSku(entity.getSku());
         dto.setPrice(entity.getPrice());
         dto.setStockQuantity(entity.getStockQuantity());
         dto.setCreatedAt(entity.getCreatedAt());
