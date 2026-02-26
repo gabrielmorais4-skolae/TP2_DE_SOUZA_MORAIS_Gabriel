@@ -18,9 +18,6 @@ public class GenericExceptionMapper implements ExceptionMapper<Exception> {
 
     @Override
     public Response toResponse(Exception exception) {
-        exception.printStackTrace();
-
-        // WildFly CDI @Transactional wraps RuntimeExceptions — unwrap and delegate
         Throwable cause = exception;
         while (cause != null) {
             if (cause instanceof WebApplicationException e) {
